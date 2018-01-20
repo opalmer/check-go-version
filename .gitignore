@@ -1,0 +1,4 @@
+/.idea/
+/check-go-version
+/.gocoverage/
+/coverage.txt
