@@ -72,7 +72,7 @@ func (s *HTTPTest) TestGetReleasesVersion(c *C) {
 
 	for _, release := range releases {
 		if _, err := release.Version(); err != nil {
-			c.Errorf("Version failed %s", release)
+			c.Errorf("failed %s (err: %s)", release, err)
 		}
 	}
 }
