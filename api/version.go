@@ -1,4 +1,4 @@
-package checkversion
+package api
 
 import (
 	"errors"

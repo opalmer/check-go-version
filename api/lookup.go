@@ -1,4 +1,4 @@
-package checkversion
+package api
 
 import (
 	"context"
@@ -9,10 +9,14 @@ import (
 	"google.golang.org/api/option"
 )
 
-// GetBucketVersions queries the golang bucket in Google Object Store and returns
-// the versions as a list.
+// BucketTimeout represents the amount of time we're willing to spend
+// retrieving information from the golang bucket.
+var BucketTimeout = time.Minute * 5
+
+// GetBucketVersions queries the golang bucket in Google Object Store and
+// returns the versions present as a list.
 func GetBucketVersions() ([]string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	ctx, cancel := context.WithTimeout(context.Background(), BucketTimeout)
 	defer cancel()
 
 	client, err := storage.NewClient(ctx, option.WithoutAuthentication())
@@ -35,6 +39,5 @@ func GetBucketVersions() ([]string, error) {
 		default:
 			return releases, err
 		}
-
 	}
 }
