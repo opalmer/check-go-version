@@ -1,18 +1,19 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/opalmer/check-go-version/checkversion"
 )
 
 func main() {
-	releases, err := checkversion.GetReleases()
+	versions, err := checkversion.GetBucketVersions()
 	if err != nil {
 		panic(err)
 	}
 
-	for _, release := range releases {
-		_ = release
-
+	for _, version := range versions {
+		fmt.Println(version)
 	}
 
 }
