@@ -1,8 +1,10 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"log"
+
+	"fmt"
 
 	"github.com/opalmer/check-go-version/api"
 )
