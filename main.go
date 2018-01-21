@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/opalmer/check-go-version/api"
 )
 
 func main() {
-	versions, err := api.GetBucketVersions()
+	versions, err := api.GetVersions()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	for _, version := range versions {

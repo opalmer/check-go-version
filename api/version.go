@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"cloud.google.com/go/storage"
 )
 
 var (
@@ -78,26 +80,35 @@ func (r *Release) Version() (*Version, error) {
 	if len(split) == 1 {
 
 	}
-	//fmt.Println(version)
-
 	return nil, nil
-	//matches := RegexVersion.FindAllStringSubmatch(r.Key, -1)
-	//if matches == nil {
-	//	return nil, ErrFailedToMatchVersion
-	//}
-	//
-	//strings.Split(r.Key, "-")
-	//
-	//version, err := r.version()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//_ = version
-	//return nil, nil
-	//return &Version{
-	//	Version:      version,
-	//	Type:         match[2],
-	//	Platform:     match[3],
-	//	Architecture: match[4],
-	//}, nil
+}
+
+func getName(attribute *storage.ObjectAttrs) string {
+	if attribute.ContentType == "application/x-gzip" {
+		return strings.Replace(attribute.Name, ".tar.gz", "", 1)
+	} else {
+		name := attribute.Name
+		split := strings.Split(name, ".")
+		return strings.Replace(name, "."+split[len(split)-1], "", 1)
+	}
+}
+
+// GetVersions returns a list of golang releases.
+func GetVersions() ([]*Version, error) {
+	attributes, err := GetBucketObjects()
+	if err != nil {
+		return nil, err
+	}
+	var versions []*Version
+
+	for _, attribute := range attributes {
+		if strings.HasPrefix(attribute.ContentType, "text/plain") {
+			continue
+		}
+
+		name := getName(attribute)
+		fmt.Println(name)
+	}
+
+	return versions, nil
 }
