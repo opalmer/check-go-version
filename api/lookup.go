@@ -9,17 +9,27 @@ import (
 	"google.golang.org/api/option"
 )
 
-// BucketTimeout represents the amount of time we're willing to spend
-// retrieving information from the golang bucket.
-var BucketTimeout = time.Minute * 5
+var (
+	// BucketTimeout represents the amount of time we're willing to spend
+	// retrieving information from the golang bucket.
+	BucketTimeout = time.Minute * 5
 
-// GetBucketVersions queries the golang bucket in Google Object Store and
+	// url is used for testing.
+	url = ""
+)
+
+// GetBucketObjects queries the golang bucket in Google Object Store and
 // returns the versions present as a list.
-func GetBucketVersions() ([]string, error) {
+func GetBucketObjects() ([]*storage.ObjectAttrs, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), BucketTimeout)
 	defer cancel()
 
-	client, err := storage.NewClient(ctx, option.WithoutAuthentication())
+	options := []option.ClientOption{option.WithoutAuthentication()}
+	if url != "" {
+		options = append(options, option.WithEndpoint(url))
+	}
+
+	client, err := storage.NewClient(ctx, options...)
 	if err != nil {
 		return nil, err
 	}
@@ -27,17 +37,17 @@ func GetBucketVersions() ([]string, error) {
 
 	bucket := client.Bucket("golang")
 	objects := bucket.Objects(ctx, nil)
-	var releases []string
+	var entries []*storage.ObjectAttrs
 	for {
 		object, err := objects.Next()
 
 		switch err {
 		case nil:
-			releases = append(releases, object.Name)
+			entries = append(entries, object)
 		case iterator.Done:
-			return releases, nil
+			return entries, nil
 		default:
-			return releases, err
+			return entries, err
 		}
 	}
 }
