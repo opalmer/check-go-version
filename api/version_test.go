@@ -40,6 +40,12 @@ func (s *VersionTest) newServer(c *C) *httptest.Server {
 	return newTestServer(c, items)
 }
 
+func (s *VersionTest) TestGetVersions(c *C) {
+	versions, err := GetVersions()
+	c.Assert(err, IsNil)
+	c.Assert(len(versions), Not(Equals), 0)
+}
+
 func (s *VersionTest) TestSkip(c *C) {
 	c.Assert(skip(&storage.ObjectAttrs{ContentType: "text/plain"}), Equals, true)
 	c.Assert(skip(&storage.ObjectAttrs{ContentType: "text/plain; charset=utf-8"}), Equals, true)
@@ -127,6 +133,54 @@ func (s *VersionTest) TestExtractArchitectureSynthetic(c *C) {
 			c.Fatalf(`"%s" -> "%s" != "%s"`, facet.in, out, facet.out)
 		}
 	}
+}
+
+func (s *VersionTest) TestGetSemanticVersionSynthetic(c *C) {
+	facets := []*strfacet{
+		{"go1.9.2rc2.windows-386", "1.9.2"},
+		{"go1.9.2rc2.windows-amd64", "1.9.2"},
+		{"go1.9.freebsd-386", "1.9"},
+		{"go1.9.freebsd-amd64", "1.9"},
+		{"go1.4rc2.darwin-amd64-osx10.8", "1.4"},
+	}
+	for _, facet := range facets {
+		out, err := getVersion(facet.in)
+		c.Assert(err, IsNil)
+		if out != facet.out {
+			c.Fatalf(`"%s" -> "%s" != "%s"`, facet.in, out, facet.out)
+		}
+	}
+}
+
+func (s *VersionTest) TestGerFullVersionSynthetic(c *C) {
+	facets := []*strfacet{
+		{"go1.9.2rc2.windows-386", "1.9.2rc2"},
+		{"go1.9.2rc2.windows-amd64", "1.9.2rc2"},
+		{"go1.9.freebsd-386", "1.9"},
+		{"go1.9.freebsd-amd64", "1.9"},
+		{"go1.4rc2.darwin-amd64-osx10.8", "1.4rc2"},
+	}
+	for _, facet := range facets {
+		out, err := getFullVersion(facet.in)
+		c.Assert(err, IsNil)
+		if out != facet.out {
+			c.Fatalf(`"%s" -> "%s" != "%s"`, facet.in, out, facet.out)
+		}
+	}
+}
+
+func (s *VersionTest) TestVersionToIntegers(c *C) {
+	v, err := versionToIntegers("1.0.0")
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, [3]int{1, 0, 0})
+
+	v, err = versionToIntegers("1.1.1")
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, [3]int{1, 1, 1})
+
+	v, err = versionToIntegers("1.1")
+	c.Assert(err, IsNil)
+	c.Assert(v, Equals, [3]int{1, 1, 0})
 }
 
 func (s *VersionTest) TestGetVersionsIgnoresPlainText(c *C) {
