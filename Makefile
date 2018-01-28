@@ -10,7 +10,7 @@ EXTRA_DEPENDENCIES = \
     github.com/wadey/gocovmerge \
     github.com/alecthomas/gometalinter
 
-check: deps vet test coverage lint
+check: deps vet test coverage lint build
 
 deps:
 	go get $(EXTRA_DEPENDENCIES)
