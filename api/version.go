@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"runtime"
+	"sort"
 
 	"github.com/blang/semver"
 )
@@ -44,8 +45,8 @@ type Version struct {
 // String returns a human readable string representing this struct.
 func (v *Version) String() string {
 	return fmt.Sprintf(
-		`Version{%v, Version: %v, FullVersion: %v, Architecture: %v}`,
-		v.Name, v.Version, v.FullVersion, v.Architecture)
+		`Version{Name: %v, Version: %v, Platform: %v, Architecture: %v}`,
+		v.Name, v.Version, v.Platform, v.Architecture)
 }
 
 // Versions is a list of Version structs that have the added benefit of
@@ -74,14 +75,14 @@ func (vs Versions) Less(a int, b int) bool {
 //     are not actually releases (typically sha256 sums).
 //   * Is a signature instead of a release.
 //   * Appears to be a source rather than a release.
-func GetVersions() ([]*Version, error) {
+func GetVersions() (Versions, error) {
 	objects, err := GetBucketObjects()
 	if err != nil {
 		return nil, err
 	}
 
 	unique := map[string]bool{}
-	var versions []*Version
+	var versions Versions
 
 	for _, object := range objects {
 		if skip(object) {
@@ -94,33 +95,12 @@ func GetVersions() ([]*Version, error) {
 		}
 		unique[name] = true
 
-		platform, err := getPlatform(name)
+		version, err := getVersionFromName(name)
 		if err != nil {
 			return nil, err
 		}
 
-		version, err := getVersion(name)
-		if err != nil {
-			return nil, err
-		}
-
-		fullVersion, err := getFullVersion(name)
-		if err != nil {
-			return nil, err
-		}
-
-		architecture, err := getArchitecture(name)
-		if err != nil {
-			return nil, err
-		}
-
-		versions = append(versions, &Version{
-			Name:         name,
-			Platform:     platform,
-			Version:      version,
-			FullVersion:  fullVersion,
-			Architecture: architecture,
-		})
+		versions = append(versions, version)
 	}
 
 	return versions, nil
@@ -146,14 +126,14 @@ func GetReleaseVersions() ([]*Version, error) {
 
 // GetReleaseVersionsForPlatform calls GetReleaseVersions() and filters the
 // results so only releases matching the current platform are returned.
-func GetReleaseVersionsForPlatform() ([]*Version, error) {
+func GetReleaseVersionsForPlatform() (Versions, error) {
 	versions, err := GetReleaseVersions()
 	return FilterVersionsToPlatform(versions), err
 }
 
 // FilterVersionsToPlatform acts as a filter and returns all versions
 // that are matching the current platform.
-func FilterVersionsToPlatform(versions []*Version) []*Version {
+func FilterVersionsToPlatform(versions Versions) Versions {
 	var output []*Version
 
 	for _, version := range versions {
@@ -167,4 +147,28 @@ func FilterVersionsToPlatform(versions []*Version) []*Version {
 	}
 
 	return output
+}
+
+// GetRunningVersion constructs and returns a *Version struct for the currently
+// running instance of Go.
+func GetRunningVersion() (*Version, error) {
+	return getVersionFromName(
+		fmt.Sprintf("%s.%s-%s", runtime.Version(), runtime.GOOS, runtime.GOARCH))
+}
+
+// GetLatestRelease returns a *Version struct matching the latest release
+// for the currently running platform.
+func GetLatestRelease() (*Version, error) {
+	versions, err := GetReleaseVersionsForPlatform()
+	if err != nil {
+		return nil, err
+	}
+	sort.Sort(versions)
+	return versions[len(versions)-1], nil
+}
+
+// CheckLatest will return true if the latest version is the same as the
+// currently running version.
+func CheckLatest(running *Version, latest *Version) bool {
+	return running.Version.GTE(latest.Version)
 }

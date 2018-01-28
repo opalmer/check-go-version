@@ -3,35 +3,25 @@ package main
 import (
 	"fmt"
 	"log"
-	"sort"
+	"os"
 
 	"github.com/opalmer/check-go-version/api"
 )
 
 func main() {
-	versions, err := api.GetVersions()
+	running, err := api.GetRunningVersion()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	candidates := api.Versions{}
-	for _, version := range api.FilterVersionsToPlatform(versions) {
-		// Make sure we skip any version where the version
-		// does not equal the full version. This happens when
-		// there's a qualifier in the version such as 'alpha'
-		// or 'beta'.
-		if version.Version.String() != version.FullVersion {
-			continue
-		}
-		candidates = append(candidates, version)
+	latest, err := api.GetLatestRelease()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	sort.Sort(candidates)
-	latest := candidates[len(candidates)-1]
-	fmt.Println(latest)
-	//runt
-
-	//for _, value := range candidates {
-	//	fmt.Println(value)
-	//}
+	fmt.Printf(" latest: %s\n", latest)
+	fmt.Printf("running: %s\n", running)
+	if !api.CheckLatest(running, latest) {
+		os.Exit(1)
+	}
 }

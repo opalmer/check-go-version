@@ -75,3 +75,33 @@ func skip(object *storage.ObjectAttrs) bool {
 	}
 	return false
 }
+
+func getVersionFromName(name string) (*Version, error) {
+	platform, err := getPlatform(name)
+	if err != nil {
+		return nil, err
+	}
+
+	version, err := getVersion(name)
+	if err != nil {
+		return nil, err
+	}
+
+	fullVersion, err := getFullVersion(name)
+	if err != nil {
+		return nil, err
+	}
+
+	architecture, err := getArchitecture(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Version{
+		Name:         name,
+		Platform:     platform,
+		Version:      version,
+		FullVersion:  fullVersion,
+		Architecture: architecture,
+	}, nil
+}

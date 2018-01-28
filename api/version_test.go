@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"runtime"
 	"sort"
 
@@ -69,7 +70,7 @@ func (s *VersionTest) TestGetVersionsMatchingPlatformMock(c *C) {
 
 	c.Assert(
 		FilterVersionsToPlatform(versions), DeepEquals,
-		[]*Version{{Platform: runtime.GOOS, Architecture: runtime.GOARCH}})
+		Versions{{Platform: runtime.GOOS, Architecture: runtime.GOARCH}})
 }
 
 func (s *VersionTest) TestFilterVersionsToPlatform(c *C) {
@@ -83,18 +84,13 @@ func (s *VersionTest) TestFilterVersionsToPlatform(c *C) {
 }
 
 func (s *VersionTest) TestVersionString(c *C) {
-	v := &Version{Name: "foo", Version: semver.Version{Major: 1, Minor: 2, Patch: 2}, FullVersion: "1.2.3-foo", Architecture: "amd64"}
-	c.Assert(v.String(), DeepEquals, "Version{foo, Version: 1.2.2, FullVersion: 1.2.3-foo, Architecture: amd64}")
+	v := &Version{Name: "foo", Version: semver.Version{Major: 1, Minor: 2, Patch: 2}, Platform: "test", Architecture: "amd64"}
+	c.Assert(v.String(), DeepEquals, "Version{Name: foo, Version: 1.2.2, Platform: test, Architecture: amd64}")
 }
 
 func (s *VersionTest) TestVersionsSort(c *C) {
-	found, err := GetVersions()
+	versions, err := GetVersions()
 	c.Assert(err, IsNil)
-	var versions Versions
-
-	for _, version := range found {
-		versions = append(versions, version)
-	}
 	c.Assert(sort.IsSorted(versions), Equals, false)
 	sort.Sort(versions)
 	c.Assert(sort.IsSorted(versions), Equals, true)
@@ -117,4 +113,32 @@ func (s *VersionTest) TestGetReleaseVersionsForPlatform(c *C) {
 		c.Assert(version.Platform, Equals, runtime.GOOS)
 		c.Assert(version.Architecture, Equals, runtime.GOARCH)
 	}
+}
+
+func (s *VersionTest) TestGetRunningVersion(c *C) {
+	v1, err := GetRunningVersion()
+	c.Assert(err, IsNil)
+
+	v2, err := getVersionFromName(
+		fmt.Sprintf("%s.%s-%s", runtime.Version(), runtime.GOOS, runtime.GOARCH))
+	c.Assert(err, IsNil)
+	c.Assert(v1, DeepEquals, v2)
+}
+
+func (s *VersionTest) TestGetLatestRelease(c *C) {
+	versions, err := GetReleaseVersionsForPlatform()
+	c.Assert(err, IsNil)
+	sort.Sort(versions)
+	expected := versions[len(versions)-1]
+	version, err := GetLatestRelease()
+	c.Assert(err, IsNil)
+	c.Assert(expected, DeepEquals, version)
+}
+
+func (s *VersionTest) TestCheckLatest(c *C) {
+	c.Assert(CheckLatest(&Version{Version: semver.MustParse("1.0.0")}, &Version{Version: semver.MustParse("1.9.3")}), Equals, false)
+	c.Assert(CheckLatest(&Version{Version: semver.MustParse("1.9.2")}, &Version{Version: semver.MustParse("1.9.3")}), Equals, false)
+	c.Assert(CheckLatest(&Version{Version: semver.MustParse("1.9.3")}, &Version{Version: semver.MustParse("1.9.3")}), Equals, true)
+	c.Assert(CheckLatest(&Version{Version: semver.MustParse("1.9.4")}, &Version{Version: semver.MustParse("1.9.3")}), Equals, true)
+	c.Assert(CheckLatest(&Version{Version: semver.MustParse("1.50.0")}, &Version{Version: semver.MustParse("1.9.3")}), Equals, true)
 }
