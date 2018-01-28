@@ -117,4 +117,3 @@ func (s *BucketTest) TestHasExpiredMissingFile(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(expired, Equals, true)
 }
-
