@@ -15,6 +15,12 @@
   version = "v0.18.0"
 
 [[projects]]
+  name = "github.com/blang/semver"
+  packages = ["."]
+  revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
+  version = "v3.5.1"
+
+[[projects]]
   name = "github.com/go-stack/stack"
   packages = ["."]
   revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
@@ -195,6 +201,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f66968e362ba776f38f4c4c44a0dd110960dcb3d251ecff867c3ad2f197dad49"
+  inputs-digest = "a8793138cdd524bff2a7268d8cd3bb6d23defe61609f8bb06292ddb18348af56"
   solver-name = "gps-cdcl"
   solver-version = 1

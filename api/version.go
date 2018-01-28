@@ -6,9 +6,8 @@ import (
 	"runtime"
 	"strings"
 
-	"strconv"
-
 	"cloud.google.com/go/storage"
+	"github.com/blang/semver"
 )
 
 var (
@@ -31,12 +30,7 @@ type Version struct {
 
 	// Version is the version excluding qualifiers such as 'beta1'. For
 	// example if FullVersion is 'go1.4rc2` then FullVersion is '1.4'.
-	Version string
-
-	// VersionIn is `Version` converted to integers. Note, if 1.9 is the
-	// version then the result of VersionInt is [3]int{1, 9, 0}. Golang's
-	// versioning, historically speaking, has never had a .0 micro release.
-	VersionInt [3]int
+	Version semver.Version
 
 	// FullVersion contains the complete version information include the semantic
 	// version.
@@ -69,28 +63,20 @@ func (vs Versions) Swap(a int, b int) {
 }
 
 func (vs Versions) Less(a int, b int) bool {
-	if vs[a].VersionInt[0] <= vs[b].VersionInt[0] {
-		return true
-	}
-
-	if vs[a].VersionInt[1] <= vs[b].VersionInt[1] {
-		return true
-	}
-	if vs[a].VersionInt[0] > vs[b].VersionInt[0] {
-		return false
-	}
-	return false
-
-	//return vs[a].VersionInt[2] >= vs[b].VersionInt[2]
+	return vs[a].Version.LT(vs[b].Version)
 }
 
-func getVersion(name string) (string, error) {
+func getVersion(name string) (semver.Version, error) {
 	matches := RegexSemanticVersion.FindAllStringSubmatch(name, 1)
 	if matches == nil {
-		return "", fmt.Errorf(
+		return semver.Version{}, fmt.Errorf(
 			"failed to retrieve semantic version information from '%s'", name)
 	}
-	return matches[0][1], nil
+	version := matches[0][1]
+	if strings.Count(version, ".") == 1 {
+		version += ".0"
+	}
+	return semver.Make(version)
 }
 
 func getFullVersion(name string) (string, error) {
@@ -148,18 +134,6 @@ func skip(object *storage.ObjectAttrs) bool {
 	return false
 }
 
-func versionToIntegers(version string) ([3]int, error) {
-	output := [3]int{}
-	for i, value := range strings.Split(version, ".") {
-		converted, err := strconv.Atoi(value)
-		if err != nil {
-			return output, err
-		}
-		output[i] = converted
-	}
-	return output, nil
-}
-
 // GetVersions returns a list of golang releases. This function will ignore
 // any object returned from GetBucketObjects() that matches one or more
 // of the following conditions:
@@ -200,11 +174,6 @@ func GetVersions() ([]*Version, error) {
 			return nil, err
 		}
 
-		versionInts, err := versionToIntegers(version)
-		if err != nil {
-			return nil, err
-		}
-
 		fullVersion, err := getFullVersion(name)
 		if err != nil {
 			return nil, err
@@ -219,7 +188,6 @@ func GetVersions() ([]*Version, error) {
 			Name:         name,
 			Platform:     platform,
 			Version:      version,
-			VersionInt:   versionInts,
 			FullVersion:  fullVersion,
 			Architecture: architecture,
 		})

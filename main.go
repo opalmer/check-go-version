@@ -1,9 +1,9 @@
 package main
 
 import (
-	"log"
-	//"sort"
 	"fmt"
+	"log"
+	"sort"
 
 	"github.com/opalmer/check-go-version/api"
 )
@@ -20,13 +20,13 @@ func main() {
 		// does not equal the full version. This happens when
 		// there's a qualifier in the version such as 'alpha'
 		// or 'beta'.
-		if version.Version != version.FullVersion {
+		if version.Version.String() != version.FullVersion {
 			continue
 		}
 		candidates = append(candidates, version)
 	}
 
-	//sort.Sort(candidates)
+	sort.Sort(candidates)
 
 	for _, value := range candidates {
 		fmt.Println(value)

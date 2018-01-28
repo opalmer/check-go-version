@@ -31,3 +31,7 @@
 [[constraint]]
   branch = "v1"
   name = "gopkg.in/check.v1"
+
+[[constraint]]
+  name = "github.com/blang/semver"
+  version = "3.5.1"

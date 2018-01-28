@@ -128,20 +128,20 @@ func (s *VersionTest) TestGetSemanticVersionSynthetic(c *C) {
 	facets := []*strfacet{
 		{"go1.9.2rc2.windows-386", "1.9.2"},
 		{"go1.9.2rc2.windows-amd64", "1.9.2"},
-		{"go1.9.freebsd-386", "1.9"},
-		{"go1.9.freebsd-amd64", "1.9"},
-		{"go1.4rc2.darwin-amd64-osx10.8", "1.4"},
+		{"go1.9.freebsd-386", "1.9.0"},
+		{"go1.9.freebsd-amd64", "1.9.0"},
+		{"go1.4rc2.darwin-amd64-osx10.8", "1.4.0"},
 	}
 	for _, facet := range facets {
 		out, err := getVersion(facet.in)
 		c.Assert(err, IsNil)
-		if out != facet.out {
+		if out.String() != facet.out {
 			c.Fatalf(`"%s" -> "%s" != "%s"`, facet.in, out, facet.out)
 		}
 	}
 }
 
-func (s *VersionTest) TestGerFullVersionSynthetic(c *C) {
+func (s *VersionTest) TestGetFullVersionSynthetic(c *C) {
 	facets := []*strfacet{
 		{"go1.9.2rc2.windows-386", "1.9.2rc2"},
 		{"go1.9.2rc2.windows-amd64", "1.9.2rc2"},
@@ -156,20 +156,6 @@ func (s *VersionTest) TestGerFullVersionSynthetic(c *C) {
 			c.Fatalf(`"%s" -> "%s" != "%s"`, facet.in, out, facet.out)
 		}
 	}
-}
-
-func (s *VersionTest) TestVersionToIntegers(c *C) {
-	v, err := versionToIntegers("1.0.0")
-	c.Assert(err, IsNil)
-	c.Assert(v, Equals, [3]int{1, 0, 0})
-
-	v, err = versionToIntegers("1.1.1")
-	c.Assert(err, IsNil)
-	c.Assert(v, Equals, [3]int{1, 1, 1})
-
-	v, err = versionToIntegers("1.1")
-	c.Assert(err, IsNil)
-	c.Assert(v, Equals, [3]int{1, 1, 0})
 }
 
 func (s *VersionTest) TestGetVersionsIgnoresPlainText(c *C) {
