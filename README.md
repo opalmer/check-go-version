@@ -1,5 +1,10 @@
 # About
 
+[![Build Status](https://travis-ci.org/opalmer/check-go-version.svg?branch=master)](https://travis-ci.org/opalmer/check-go-version)
+[![codecov](https://codecov.io/gh/opalmer/check-go-version/branch/master/graph/badge.svg)](https://codecov.io/gh/opalmer/check-go-version)
+[![Go Report Card](https://goreportcard.com/badge/github.com/opalmer/check-go-version)](https://goreportcard.com/report/github.com/opalmer/check-go-version)
+[![GoDoc](https://godoc.org/github.com/opalmer/check-go-version?status.svg)](https://godoc.org/github.com/opalmer/check-go-version)
+
 This project is intended to process information about release versions of
 Go from the following API:
 
