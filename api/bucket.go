@@ -34,7 +34,6 @@ var (
 	// retrieving information from the golang bucket.
 	BucketTimeout = time.Minute * 5
 
-	// url is used for testing.
 	url = ""
 )
 
