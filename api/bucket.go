@@ -33,7 +33,7 @@ func GetBucketObjects() ([]*storage.ObjectAttrs, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer client.Close()
+	defer client.Close() // nolint: errcheck
 
 	bucket := client.Bucket("golang")
 	objects := bucket.Objects(ctx, nil)

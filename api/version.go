@@ -23,8 +23,7 @@ var (
 	RegexFullVersion = regexp.MustCompile(`^go(\d+\.\d+[a-z0-9]*(\.\d[a-z0-9]*|)).+$`)
 )
 
-// FullVersion returns specific information about a Go version from
-// a Release struct.
+// Version returns specific information about a Go version.
 type Version struct {
 	// Name is the complete name of the version excluding the original
 	// suffix (ex. go1.9.2rc2.windows-386 instead of go1.9.2rc2.windows-386.msi)
@@ -57,6 +56,8 @@ func (v *Version) String() string {
 		v.Name, v.Version, v.FullVersion, v.Architecture)
 }
 
+// Versions is a list of Version structs that have the added benefit of
+// being sortable.
 type Versions []*Version
 
 func (vs Versions) Len() int {

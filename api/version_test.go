@@ -1,7 +1,6 @@
 package api
 
 import (
-	"net/http/httptest"
 	"runtime"
 	"strings"
 
@@ -28,17 +27,6 @@ func (s *VersionTest) SetUpSuite(c *C) {
 
 func (s *VersionTest) TearDownTest(c *C) {
 	url = ""
-}
-
-func (s *VersionTest) newServer(c *C) *httptest.Server {
-	items := &items{}
-	for _, object := range s.objects {
-		items.Items = append(items.Items, &item{
-			Name:        object.Name,
-			ContentType: object.ContentType,
-		})
-	}
-	return newTestServer(c, items)
 }
 
 func (s *VersionTest) TestGetVersions(c *C) {
