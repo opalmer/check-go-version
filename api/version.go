@@ -126,27 +126,10 @@ func GetVersions() ([]*Version, error) {
 	return versions, nil
 }
 
-// GetVersionsMatchingPlatform acts as a filter and returns all versions
-// that are matching the current platform.
-func GetVersionsMatchingPlatform(versions []*Version) []*Version {
-	var output []*Version
-
-	for _, version := range versions {
-		if version.Platform != runtime.GOOS {
-			continue
-		}
-		if version.Architecture != runtime.GOARCH {
-			continue
-		}
-		output = append(output, version)
-	}
-
-	return output
-}
-
-// GetOfficialVersions calls GetVersions and removes any version that
-// are alpha/beta/test/etc.
-func GetOfficialVersions() ([]*Version, error) {
+// GetReleaseVersions calls GetVersions and removes any version that is a
+// 'non-release' version. Basically this returns all versions except those that
+// are alpha/beta/etc. This does not provide any platform specific filtering.
+func GetReleaseVersions() ([]*Version, error) {
 	versions, err := GetVersions()
 	if err != nil {
 		return nil, err
@@ -161,9 +144,27 @@ func GetOfficialVersions() ([]*Version, error) {
 	return output, nil
 }
 
-// GetLatestVersionMatchingPlatform will return the latest release matching
-// the current operating system and platform. Note, this excludes any release
-// that's alpha/beta/etc.
-func GetLatestVersionMatchingPlatform() (*Version, error) {
-	return nil, nil
+// GetReleaseVersionsForPlatform calls GetReleaseVersions() and filters the
+// results so only releases matching the current platform are returned.
+func GetReleaseVersionsForPlatform() ([]*Version, error) {
+	versions, err := GetReleaseVersions()
+	return FilterVersionsToPlatform(versions), err
+}
+
+// FilterVersionsToPlatform acts as a filter and returns all versions
+// that are matching the current platform.
+func FilterVersionsToPlatform(versions []*Version) []*Version {
+	var output []*Version
+
+	for _, version := range versions {
+		if version.Platform != runtime.GOOS {
+			continue
+		}
+		if version.Architecture != runtime.GOARCH {
+			continue
+		}
+		output = append(output, version)
+	}
+
+	return output
 }

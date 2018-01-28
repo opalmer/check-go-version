@@ -15,7 +15,7 @@ func main() {
 	}
 
 	candidates := api.Versions{}
-	for _, version := range api.GetVersionsMatchingPlatform(versions) {
+	for _, version := range api.FilterVersionsToPlatform(versions) {
 		// Make sure we skip any version where the version
 		// does not equal the full version. This happens when
 		// there's a qualifier in the version such as 'alpha'

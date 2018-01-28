@@ -60,7 +60,7 @@ func (s *VersionTest) TestGetVersionsIgnoresGetGoInstallers(c *C) {
 	c.Assert(len(versions), Equals, 0)
 }
 
-func (s *VersionTest) TestGetVersionsMatchingPlatform(c *C) {
+func (s *VersionTest) TestGetVersionsMatchingPlatformMock(c *C) {
 	versions := []*Version{
 		{Platform: "foobar", Architecture: "foobar"},
 		{Platform: runtime.GOOS, Architecture: "foobar"},
@@ -68,8 +68,18 @@ func (s *VersionTest) TestGetVersionsMatchingPlatform(c *C) {
 	}
 
 	c.Assert(
-		GetVersionsMatchingPlatform(versions), DeepEquals,
+		FilterVersionsToPlatform(versions), DeepEquals,
 		[]*Version{{Platform: runtime.GOOS, Architecture: runtime.GOARCH}})
+}
+
+func (s *VersionTest) TestFilterVersionsToPlatform(c *C) {
+	versions, err := GetVersions()
+	c.Assert(err, IsNil)
+
+	for _, version := range FilterVersionsToPlatform(versions) {
+		c.Assert(version.Platform, Equals, runtime.GOOS)
+		c.Assert(version.Architecture, Equals, runtime.GOARCH)
+	}
 }
 
 func (s *VersionTest) TestVersionString(c *C) {
@@ -90,11 +100,21 @@ func (s *VersionTest) TestVersionsSort(c *C) {
 	c.Assert(sort.IsSorted(versions), Equals, true)
 }
 
-func (s *VersionTest) TestGetOfficialVersions(c *C) {
-	versions, err := GetOfficialVersions()
+func (s *VersionTest) TestGetReleaseVersions(c *C) {
+	versions, err := GetReleaseVersions()
 	c.Assert(err, IsNil)
 
 	for _, version := range versions {
 		c.Assert(version.Version.String(), Equals, version.FullVersion)
+	}
+}
+
+func (s *VersionTest) TestGetReleaseVersionsForPlatform(c *C) {
+	versions, err := GetReleaseVersionsForPlatform()
+	c.Assert(err, IsNil)
+	for _, version := range versions {
+		c.Assert(version.Version.String(), Equals, version.FullVersion)
+		c.Assert(version.Platform, Equals, runtime.GOOS)
+		c.Assert(version.Architecture, Equals, runtime.GOARCH)
 	}
 }
