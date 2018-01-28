@@ -22,13 +22,19 @@ type strfacet struct {
 }
 
 func (s *VersionTest) SetUpSuite(c *C) {
+	BucketCache = false
 	objects, err := GetBucketObjects()
 	c.Assert(err, IsNil)
 	s.objects = objects
 }
 
+func (s *VersionTest) SetUpTest(c *C) {
+	BucketCache = false
+}
+
 func (s *VersionTest) TearDownTest(c *C) {
 	url = ""
+	BucketCache = true
 }
 
 func (s *VersionTest) TestGetVersions(c *C) {
