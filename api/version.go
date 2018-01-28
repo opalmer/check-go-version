@@ -46,7 +46,7 @@ type Version struct {
 // String returns a human readable string representing this struct.
 func (v *Version) String() string {
 	return fmt.Sprintf(
-		`Version{"%s", Version: "%s", FullVersion: "%s", Architecture: "%s"}`,
+		`Version{%v, Version: %v, FullVersion: %v, Architecture: %v}`,
 		v.Name, v.Version, v.FullVersion, v.Architecture)
 }
 

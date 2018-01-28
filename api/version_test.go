@@ -4,7 +4,10 @@ import (
 	"runtime"
 	"strings"
 
+	"sort"
+
 	"cloud.google.com/go/storage"
+	"github.com/blang/semver"
 	. "gopkg.in/check.v1"
 )
 
@@ -192,4 +195,22 @@ func (s *VersionTest) TestGetVersionsMatchingPlatform(c *C) {
 	c.Assert(
 		GetVersionsMatchingPlatform(versions), DeepEquals,
 		[]*Version{{Platform: runtime.GOOS, Architecture: runtime.GOARCH}})
+}
+
+func (s *VersionTest) TestVersionString(c *C) {
+	v := &Version{Name: "foo", Version: semver.Version{Major: 1, Minor: 2, Patch: 2}, FullVersion: "1.2.3-foo", Architecture: "amd64"}
+	c.Assert(v.String(), DeepEquals, "Version{foo, Version: 1.2.2, FullVersion: 1.2.3-foo, Architecture: amd64}")
+}
+
+func (s *VersionTest) TestVersionsSort(c *C) {
+	found, err := GetVersions()
+	c.Assert(err, IsNil)
+	var versions Versions
+
+	for _, version := range found {
+		versions = append(versions, version)
+	}
+	c.Assert(sort.IsSorted(versions), Equals, false)
+	sort.Sort(versions)
+	c.Assert(sort.IsSorted(versions), Equals, true)
 }
