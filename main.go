@@ -27,8 +27,11 @@ func main() {
 	}
 
 	sort.Sort(candidates)
+	latest := candidates[len(candidates)-1]
+	fmt.Println(latest)
+	//runt
 
-	for _, value := range candidates {
-		fmt.Println(value)
-	}
+	//for _, value := range candidates {
+	//	fmt.Println(value)
+	//}
 }
