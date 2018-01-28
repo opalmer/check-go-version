@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http/httptest"
+	"runtime"
 	"strings"
 
 	"cloud.google.com/go/storage"
@@ -205,4 +206,16 @@ func (s *VersionTest) TestGetVersionsIgnoresGetGoInstallers(c *C) {
 	versions, err := GetVersions()
 	c.Assert(err, IsNil)
 	c.Assert(len(versions), Equals, 0)
+}
+
+func (s *VersionTest) TestGetVersionsMatchingPlatform(c *C) {
+	versions := []*Version{
+		{Platform: "foobar", Architecture: "foobar"},
+		{Platform: runtime.GOOS, Architecture: "foobar"},
+		{Platform: runtime.GOOS, Architecture: runtime.GOARCH},
+	}
+
+	c.Assert(
+		GetVersionsMatchingPlatform(versions), DeepEquals,
+		[]*Version{{Platform: runtime.GOOS, Architecture: runtime.GOARCH}})
 }

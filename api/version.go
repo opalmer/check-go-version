@@ -236,7 +236,6 @@ func GetVersionsMatchingPlatform(versions []*Version) []*Version {
 		if version.Platform != runtime.GOOS {
 			continue
 		}
-
 		if version.Architecture != runtime.GOARCH {
 			continue
 		}
