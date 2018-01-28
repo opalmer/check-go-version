@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"strings"
 
 	"cloud.google.com/go/storage"
@@ -61,14 +62,14 @@ func (s *HelpersTest) TestStripSuffix(c *C) {
 	}
 }
 
-func (s *HelpersTest) TestExtractPlatformError(c *C) {
+func (s *HelpersTest) TestGetPlatformError(c *C) {
 	_, err := getPlatform("go1.4rc2.darwin-amd64-osx10.8-1")
-	c.Assert(err, ErrorMatches, `failed to extract platform from "go1.4rc2.darwin-amd64-osx10.8-1"`)
+	c.Assert(err, ErrorMatches, `failed to retrieve platform from "go1.4rc2.darwin-amd64-osx10.8-1"`)
 	_, err = getPlatform("go1.4rc2.darwin")
-	c.Assert(err, ErrorMatches, `failed to extract platform from "go1.4rc2.darwin"`)
+	c.Assert(err, ErrorMatches, `failed to retrieve platform from "go1.4rc2.darwin"`)
 }
 
-func (s *HelpersTest) TestExtractPlatformSynthetic(c *C) {
+func (s *HelpersTest) TestGetPlatformSynthetic(c *C) {
 	facets := []*strfacet{
 		{"go1.9.2rc2.windows-386", "windows"},
 		{"go1.9.2rc2.windows-amd64", "windows"},
@@ -85,7 +86,7 @@ func (s *HelpersTest) TestExtractPlatformSynthetic(c *C) {
 	}
 }
 
-func (s *HelpersTest) TestExtractPlatform(c *C) {
+func (s *HelpersTest) TestGetPlatform(c *C) {
 	for _, object := range s.objects {
 		if skip(object) {
 			continue
@@ -95,7 +96,7 @@ func (s *HelpersTest) TestExtractPlatform(c *C) {
 	}
 }
 
-func (s *HelpersTest) TestExtractArchitectureSynthetic(c *C) {
+func (s *HelpersTest) TestGetArchitectureSynthetic(c *C) {
 	facets := []*strfacet{
 		{"go1.9.2rc2.windows-386", "386"},
 		{"go1.9.2rc2.windows-amd64", "amd64"},
@@ -111,8 +112,14 @@ func (s *HelpersTest) TestExtractArchitectureSynthetic(c *C) {
 		}
 	}
 }
+func (s *HelpersTest) TestGetArchitectureError(c *C) {
+	for _, input := range []string{"", "1-2-3-4"} {
+		_, err := getArchitecture(input)
+		c.Assert(err, ErrorMatches, fmt.Sprintf(`failed to retrieve architecture from "%s"`, input))
+	}
+}
 
-func (s *HelpersTest) TestGetSemanticVersionSynthetic(c *C) {
+func (s *HelpersTest) TestGetVersionSynthetic(c *C) {
 	facets := []*strfacet{
 		{"go1.9.2rc2.windows-386", "1.9.2"},
 		{"go1.9.2rc2.windows-amd64", "1.9.2"},
@@ -129,6 +136,12 @@ func (s *HelpersTest) TestGetSemanticVersionSynthetic(c *C) {
 	}
 }
 
+func (s *HelpersTest) TestGetVersionError(c *C) {
+	for _, input := range []string{"x.", "", "1", "1."} {
+		_, err := getVersion(input)
+		c.Assert(err, ErrorMatches, fmt.Sprintf(`failed to retrieve version information from "%s"`, input))
+	}
+}
 func (s *HelpersTest) TestGetFullVersionSynthetic(c *C) {
 	facets := []*strfacet{
 		{"go1.9.2rc2.windows-386", "1.9.2rc2"},
@@ -143,5 +156,12 @@ func (s *HelpersTest) TestGetFullVersionSynthetic(c *C) {
 		if out != facet.out {
 			c.Fatalf(`"%s" -> "%s" != "%s"`, facet.in, out, facet.out)
 		}
+	}
+}
+
+func (s *HelpersTest) TestGetFullVersionError(c *C) {
+	for _, input := range []string{"x.", "", "1", "1."} {
+		_, err := getFullVersion(input)
+		c.Assert(err, ErrorMatches, fmt.Sprintf(`failed to retrieve full version information from "%s"`, input))
 	}
 }

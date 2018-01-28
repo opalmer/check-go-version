@@ -12,7 +12,7 @@ func getVersion(name string) (semver.Version, error) {
 	matches := RegexSemanticVersion.FindAllStringSubmatch(name, 1)
 	if matches == nil {
 		return semver.Version{}, fmt.Errorf(
-			"failed to retrieve semantic version information from '%s'", name)
+			`failed to retrieve version information from "%s"`, name)
 	}
 	version := matches[0][1]
 	if strings.Count(version, ".") == 1 {
@@ -25,7 +25,7 @@ func getFullVersion(name string) (string, error) {
 	matches := RegexFullVersion.FindAllStringSubmatch(name, 1)
 	if matches == nil {
 		return "", fmt.Errorf(
-			"failed to retrieve full version information from '%s'", name)
+			`failed to retrieve full version information from "%s"`, name)
 	}
 	return matches[0][1], nil
 }
@@ -45,7 +45,7 @@ func getArchitecture(name string) (string, error) {
 		split := strings.Split(strings.Split(name, "-")[1], ".")
 		return split[len(split)-1], nil
 	default:
-		return "", fmt.Errorf(`failed to extract architecture from "%s"`, name)
+		return "", fmt.Errorf(`failed to retrieve architecture from "%s"`, name)
 	}
 }
 
@@ -55,7 +55,7 @@ func getPlatform(name string) (string, error) {
 		split := strings.Split(strings.Split(name, "-")[0], ".")
 		return split[len(split)-1], nil
 	default:
-		return "", fmt.Errorf(`failed to extract platform from "%s"`, name)
+		return "", fmt.Errorf(`failed to retrieve platform from "%s"`, name)
 	}
 }
 
